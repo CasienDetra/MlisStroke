@@ -7,10 +7,12 @@ where
     F: Fn(String) + Send + Sync + 'static,
 {
     let pressed_keys = Arc::new(Mutex::new(HashSet::<Key>::new()));
+    let last_combo = Arc::new(Mutex::new(String::new()));
     let emit = Arc::new(emit);
 
     let callback = {
         let pressed_keys = pressed_keys.clone();
+        let last_combo = last_combo.clone();
         let emit = emit.clone();
 
         move |event: Event| {
@@ -19,8 +21,11 @@ where
                     let mut keys = pressed_keys.lock().unwrap();
                     keys.insert(key);
 
-                    if keys.len() > 0 {
-                        let combo = format_combo(&keys);
+                    let combo = format_combo(&keys);
+
+                    let mut last = last_combo.lock().unwrap();
+                    if *last != combo {
+                        *last = combo.clone();
                         emit(combo);
                     }
                 }
@@ -54,13 +59,15 @@ fn format_combo(keys: &HashSet<Key>) -> String {
 fn sort_keys(mut keys: Vec<String>) -> Vec<String> {
     let order = ["Ctrl", "Shift", "Alt", "Meta"];
 
-    keys.sort_by_key(|k| {
-        order.iter().position(|&x| x == k).unwrap_or(100)
+    keys.sort_by(|a, b| {
+        let a_pos = order.iter().position(|&x| x == a).unwrap_or(100);
+        let b_pos = order.iter().position(|&x| x == b).unwrap_or(100);
+
+        a_pos.cmp(&b_pos).then_with(|| a.cmp(b))
     });
 
     keys
 }
-
 fn key_to_string(key: &Key) -> String {
     match key {
         Key::ControlLeft | Key::ControlRight => "Ctrl".into(),
