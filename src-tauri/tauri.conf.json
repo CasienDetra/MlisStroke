@@ -19,7 +19,9 @@
         "fullscreen": false,
         "resizable": true,
         "skipTaskbar": true,
-        "shadow": false
+        "shadow": false,
+        "height": 200,
+        "width": 200
       }
     ],
     "security": {

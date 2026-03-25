@@ -1,10 +1,16 @@
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
   background: transparent;
   overflow: hidden;
-  font-family: sans-serif;
+  font-family: "Inter";
 }
-
 .container {
   position: fixed;
   bottom: 60px;
@@ -21,12 +27,17 @@ body {
 
 .key {
   padding: 14px 18px;
-  background: rgba(30, 30, 30, 0.85);
+  background: rgba(30, 30, 30, 0.95);
   color: white;
-  border-radius: 10px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 15px;
   font-weight: 500;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(38px);
+}
+
+.drag {
+  -webkit-app-region: drag;
 }
 
 /* animation like KeyCastr */

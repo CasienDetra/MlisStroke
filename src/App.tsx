@@ -27,16 +27,14 @@ export default function App() {
   const keys = combo.split(" + ");
 
   return (
-    <div className="container">
-      {visible && (
-        <div className="keystroke">
-          {keys.map((key, index) => (
-            <div key={index} className="key">
-              {key}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+<div className="drag container">
+  <div className="keystroke">
+    {keys.map((k, i) => (
+      <div key={i} className="key">
+        {k}
+      </div>
+    ))}
+  </div>
+</div>
   );
 }
