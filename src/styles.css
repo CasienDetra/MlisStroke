@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.container {
+  position: fixed;
+  bottom: 60px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.keystroke {
+  display: flex;
+  gap: 10px;
+  animation: fadeInOut 1.2s ease;
+}
+
+.key {
+  padding: 14px 18px;
+  background: rgba(30, 30, 30, 0.85);
+  color: white;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+/* animation like KeyCastr */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
