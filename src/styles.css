@@ -1,22 +1,27 @@
-/* @font-face { */
-/*   font-family: "Inter"; */
-/*   src: url("/fonts/Inter-Regular.ttf") format("truetype"); */
-/*   font-weight: normal; */
-/*   font-style: normal; */
-/* } */
-
 body {
   margin: 0;
   background: transparent;
   overflow: hidden;
   font-family: PlemolJP Console NF;
+  width: auto;
+  height: auto;
 }
+
+#root {
+  width: auto;
+  height: auto;
+}
+
 .container {
   position: fixed;
   bottom: 60px;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
 }
 
 .keystroke {
@@ -25,6 +30,8 @@ body {
   border-radius: 10px;
   background: rgba(30, 30, 30, 0.95);
   animation: fadeInOut 1.2s ease;
+  width: fit-content;
+  height: fit-content;
 }
 
 .key {
@@ -32,6 +39,7 @@ body {
   color: white;
   font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Regular keys (letters, numbers, etc.) */
