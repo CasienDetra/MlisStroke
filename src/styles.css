@@ -1,8 +1,15 @@
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
   background: transparent;
   overflow: hidden;
-  font-family: PlemolJP Console NF;
+  font-family: "Inter";
   width: auto;
   height: auto;
 }
