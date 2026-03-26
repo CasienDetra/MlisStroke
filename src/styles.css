@@ -1,15 +1,15 @@
-@font-face {
-  font-family: "Inter";
-  src: url("/fonts/Inter-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
+/* @font-face { */
+/*   font-family: "Inter"; */
+/*   src: url("/fonts/Inter-Regular.ttf") format("truetype"); */
+/*   font-weight: normal; */
+/*   font-style: normal; */
+/* } */
 
 body {
   margin: 0;
   background: transparent;
   overflow: hidden;
-  font-family: "Inter";
+  font-family: PlemolJP Console NF;
 }
 .container {
   position: fixed;
@@ -32,6 +32,11 @@ body {
   color: white;
   font-size: 15px;
   font-weight: 500;
+}
+
+/* Regular keys (letters, numbers, etc.) */
+.key-regular {
+  padding: 14px 18px;
 }
 
 .drag {
