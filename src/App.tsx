@@ -24,6 +24,7 @@ export default function App() {
     };
   }, []);
 
+    // this not working at all
   const keys = combo.split(" + ");
 
   return (

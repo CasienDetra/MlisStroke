@@ -22,18 +22,16 @@ body {
 .keystroke {
   display: flex;
   gap: 10px;
+  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.95);
   animation: fadeInOut 1.2s ease;
 }
 
 .key {
   padding: 14px 18px;
-  background: rgba(30, 30, 30, 0.95);
   color: white;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 15px;
   font-weight: 500;
-  backdrop-filter: blur(38px);
 }
 
 .drag {
