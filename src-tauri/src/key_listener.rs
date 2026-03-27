@@ -153,6 +153,7 @@ fn key_to_string(key: &Key, has_shift: bool, caps_lock_on: bool) -> String {
 
         Key::Return => "Enter".into(),
         Key::Space => "Space".into(),
+        Key::Tab => "Tab".into(),
 
         Key::KeyA => {
             if has_shift || caps_lock_on {
@@ -334,6 +335,85 @@ fn key_to_string(key: &Key, has_shift: bool, caps_lock_on: bool) -> String {
                 "Z".into()
             } else {
                 "z".into()
+            }
+        }
+
+        // Special characters
+        Key::LeftBracket => {
+            if has_shift {
+                "{".into()
+            } else {
+                "[".into()
+            }
+        }
+        Key::RightBracket => {
+            if has_shift {
+                "}".into()
+            } else {
+                "]".into()
+            }
+        }
+        Key::SemiColon => {
+            if has_shift {
+                ":".into()
+            } else {
+                ";".into()
+            }
+        }
+        Key::Quote => {
+            if has_shift {
+                "\"".into()
+            } else {
+                "'".into()
+            }
+        }
+        Key::Comma => {
+            if has_shift {
+                "<".into()
+            } else {
+                ",".into()
+            }
+        }
+        Key::Dot => {
+            if has_shift {
+                ">".into()
+            } else {
+                ".".into()
+            }
+        }
+        Key::Slash => {
+            if has_shift {
+                "?".into()
+            } else {
+                "/".into()
+            }
+        }
+        Key::BackSlash => {
+            if has_shift {
+                "|".into()
+            } else {
+                "\\".into()
+            }
+        }
+        Key::BackQuote => {
+            if has_shift {
+                "~".into()
+            } else {
+                "`".into()
+            }
+        }
+        Key::Minus => {
+            if has_shift {
+                "_".into()
+            } else {
+                "-".into()
+            }
+        }
+        Key::Equal => {
+            if has_shift {
+                "+".into()
+            } else {
+                "=".into()
             }
         }
 
