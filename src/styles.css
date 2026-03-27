@@ -51,7 +51,7 @@ body {
 
 /* Regular keys (letters, numbers, etc.) */
 .key-regular {
-  padding: 14px 12px;
+  padding: 10px 12px;
 }
 
 .drag {
