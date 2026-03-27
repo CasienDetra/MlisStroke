@@ -8,20 +8,29 @@ where
 {
     let pressed_keys = Arc::new(Mutex::new(HashSet::<Key>::new()));
     let last_combo = Arc::new(Mutex::new(String::new()));
+    let caps_lock_on = Arc::new(Mutex::new(false));
     let emit = Arc::new(emit);
 
     let callback = {
         let pressed_keys = pressed_keys.clone();
         let last_combo = last_combo.clone();
+        let caps_lock_on = caps_lock_on.clone();
         let emit = emit.clone();
 
         move |event: Event| {
             match event.event_type {
                 EventType::KeyPress(key) => {
+                    // Track caps lock state
+                    if key == Key::CapsLock {
+                        let mut caps = caps_lock_on.lock().unwrap();
+                        *caps = !*caps;
+                    }
+
                     let mut keys = pressed_keys.lock().unwrap();
                     keys.insert(key);
 
-                    let combo = format_combo(&keys);
+                    let caps = caps_lock_on.lock().unwrap();
+                    let combo = format_combo(&keys, *caps);
 
                     let mut last = last_combo.lock().unwrap();
                     if *last != combo {
@@ -45,11 +54,25 @@ where
     }
 }
 
-fn format_combo(keys: &HashSet<Key>) -> String {
+fn format_combo(keys: &HashSet<Key>, caps_lock_on: bool) -> String {
+    let has_shift = keys
+        .iter()
+        .any(|k| matches!(k, Key::ShiftLeft | Key::ShiftRight));
+    let has_caps_lock = keys.iter().any(|k| k == &Key::CapsLock);
+
     let mut parts: Vec<String> = keys
         .iter()
-        .map(|k| key_to_string(k))
+        .map(|k| key_to_string(k, has_shift, caps_lock_on))
         .collect();
+
+    // Remove "Shift" from parts if it's only being used for letter capitalization
+    let has_non_letter_keys = parts
+        .iter()
+        .any(|p| !p.chars().all(|c| c.is_alphabetic()) && p != "Shift");
+
+    if has_shift && !has_non_letter_keys && !has_caps_lock {
+        parts.retain(|p| p != "Shift");
+    }
 
     parts = sort_keys(parts);
 
@@ -68,42 +91,200 @@ fn sort_keys(mut keys: Vec<String>) -> Vec<String> {
 
     keys
 }
-fn key_to_string(key: &Key) -> String {
+
+fn key_to_string(key: &Key, has_shift: bool, caps_lock_on: bool) -> String {
     match key {
         Key::ControlLeft | Key::ControlRight => "Ctrl".into(),
         Key::ShiftLeft | Key::ShiftRight => "Shift".into(),
         Key::Alt | Key::AltGr => "Alt".into(),
         Key::MetaLeft | Key::MetaRight => "Meta".into(),
+        Key::CapsLock => "CapsLock".into(),
 
         Key::Return => "Enter".into(),
         Key::Space => "Space".into(),
 
-        Key::KeyA => "A".into(),
-        Key::KeyB => "B".into(),
-        Key::KeyC => "C".into(),
-        Key::KeyD => "D".into(),
-        Key::KeyE => "E".into(),
-        Key::KeyF => "F".into(),
-        Key::KeyG => "G".into(),
-        Key::KeyH => "H".into(),
-        Key::KeyI => "I".into(),
-        Key::KeyJ => "J".into(),
-        Key::KeyK => "K".into(),
-        Key::KeyL => "L".into(),
-        Key::KeyM => "M".into(),
-        Key::KeyN => "N".into(),
-        Key::KeyO => "O".into(),
-        Key::KeyP => "P".into(),
-        Key::KeyQ => "Q".into(),
-        Key::KeyR => "R".into(),
-        Key::KeyS => "S".into(),
-        Key::KeyT => "T".into(),
-        Key::KeyU => "U".into(),
-        Key::KeyV => "V".into(),
-        Key::KeyW => "W".into(),
-        Key::KeyX => "X".into(),
-        Key::KeyY => "Y".into(),
-        Key::KeyZ => "Z".into(),
+        Key::KeyA => {
+            if has_shift || caps_lock_on {
+                "A".into()
+            } else {
+                "a".into()
+            }
+        }
+        Key::KeyB => {
+            if has_shift || caps_lock_on {
+                "B".into()
+            } else {
+                "b".into()
+            }
+        }
+        Key::KeyC => {
+            if has_shift || caps_lock_on {
+                "C".into()
+            } else {
+                "c".into()
+            }
+        }
+        Key::KeyD => {
+            if has_shift || caps_lock_on {
+                "D".into()
+            } else {
+                "d".into()
+            }
+        }
+        Key::KeyE => {
+            if has_shift || caps_lock_on {
+                "E".into()
+            } else {
+                "e".into()
+            }
+        }
+        Key::KeyF => {
+            if has_shift || caps_lock_on {
+                "F".into()
+            } else {
+                "f".into()
+            }
+        }
+        Key::KeyG => {
+            if has_shift || caps_lock_on {
+                "G".into()
+            } else {
+                "g".into()
+            }
+        }
+        Key::KeyH => {
+            if has_shift || caps_lock_on {
+                "H".into()
+            } else {
+                "h".into()
+            }
+        }
+        Key::KeyI => {
+            if has_shift || caps_lock_on {
+                "I".into()
+            } else {
+                "i".into()
+            }
+        }
+        Key::KeyJ => {
+            if has_shift || caps_lock_on {
+                "J".into()
+            } else {
+                "j".into()
+            }
+        }
+        Key::KeyK => {
+            if has_shift || caps_lock_on {
+                "K".into()
+            } else {
+                "k".into()
+            }
+        }
+        Key::KeyL => {
+            if has_shift || caps_lock_on {
+                "L".into()
+            } else {
+                "l".into()
+            }
+        }
+        Key::KeyM => {
+            if has_shift || caps_lock_on {
+                "M".into()
+            } else {
+                "m".into()
+            }
+        }
+        Key::KeyN => {
+            if has_shift || caps_lock_on {
+                "N".into()
+            } else {
+                "n".into()
+            }
+        }
+        Key::KeyO => {
+            if has_shift || caps_lock_on {
+                "O".into()
+            } else {
+                "o".into()
+            }
+        }
+        Key::KeyP => {
+            if has_shift || caps_lock_on {
+                "P".into()
+            } else {
+                "p".into()
+            }
+        }
+        Key::KeyQ => {
+            if has_shift || caps_lock_on {
+                "Q".into()
+            } else {
+                "q".into()
+            }
+        }
+        Key::KeyR => {
+            if has_shift || caps_lock_on {
+                "R".into()
+            } else {
+                "r".into()
+            }
+        }
+        Key::KeyS => {
+            if has_shift || caps_lock_on {
+                "S".into()
+            } else {
+                "s".into()
+            }
+        }
+        Key::KeyT => {
+            if has_shift || caps_lock_on {
+                "T".into()
+            } else {
+                "t".into()
+            }
+        }
+        Key::KeyU => {
+            if has_shift || caps_lock_on {
+                "U".into()
+            } else {
+                "u".into()
+            }
+        }
+        Key::KeyV => {
+            if has_shift || caps_lock_on {
+                "V".into()
+            } else {
+                "v".into()
+            }
+        }
+        Key::KeyW => {
+            if has_shift || caps_lock_on {
+                "W".into()
+            } else {
+                "w".into()
+            }
+        }
+        Key::KeyX => {
+            if has_shift || caps_lock_on {
+                "X".into()
+            } else {
+                "x".into()
+            }
+        }
+        Key::KeyY => {
+            if has_shift || caps_lock_on {
+                "Y".into()
+            } else {
+                "y".into()
+            }
+        }
+        Key::KeyZ => {
+            if has_shift || caps_lock_on {
+                "Z".into()
+            } else {
+                "z".into()
+            }
+        }
 
         _ => format!("{:?}", key),
     }
