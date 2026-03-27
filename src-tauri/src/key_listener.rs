@@ -60,33 +60,84 @@ fn format_combo(keys: &HashSet<Key>, caps_lock_on: bool) -> String {
         .any(|k| matches!(k, Key::ShiftLeft | Key::ShiftRight));
     let has_caps_lock = keys.iter().any(|k| k == &Key::CapsLock);
 
-    let mut parts: Vec<String> = keys
+    let parts: Vec<String> = keys
         .iter()
         .map(|k| key_to_string(k, has_shift, caps_lock_on))
         .collect();
 
-    // Remove "Shift" from parts if it's only being used for letter capitalization
-    let has_non_letter_keys = parts
-        .iter()
-        .any(|p| !p.chars().all(|c| c.is_alphabetic()) && p != "Shift");
+    // Separate modifiers from other keys (letters, special keys, etc.)
+    let mut modifiers: Vec<String> = Vec::new();
+    let mut other_keys: Vec<String> = Vec::new();
 
-    if has_shift && !has_non_letter_keys && !has_caps_lock {
-        parts.retain(|p| p != "Shift");
+    for part in parts {
+        if part == "Ctrl" || part == "Shift" || part == "Alt" || part == "Meta" {
+            modifiers.push(part);
+        } else {
+            other_keys.push(part);
+        }
     }
 
-    parts = sort_keys(parts);
+    // Remove "Shift" from modifiers if it's only being used for letter capitalization
+    if has_shift && !has_caps_lock {
+        modifiers.retain(|p| p != "Shift");
+    }
 
-    parts.join(" + ")
+    // Convert modifier names to icons and sort
+    let modifier_icons: Vec<String> = modifiers.iter().map(|m| modifier_to_icon(m)).collect();
+    let sorted_icons = sort_modifier_icons(modifier_icons);
+
+    // Convert other keys to icons where applicable and sort
+    let other_icons: Vec<String> = other_keys.iter().map(|k| key_to_icon(k)).collect();
+    let mut sorted_others: Vec<String> = other_icons.clone();
+
+    // Sort non-modifier keys: letters alphabetically, special keys as-is
+    sorted_others.sort_by(|a, b| {
+        let a_is_letter = a.chars().all(|c| c.is_alphabetic());
+        let b_is_letter = b.chars().all(|c| c.is_alphabetic());
+
+        match (a_is_letter, b_is_letter) {
+            (true, true) => a.to_lowercase().cmp(&b.to_lowercase()),
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            (false, false) => a.cmp(b),
+        }
+    });
+
+    // Combine: modifiers first, then other keys
+    let mut result = sorted_icons;
+    result.extend(sorted_others);
+
+    result.join(" ")
 }
 
-fn sort_keys(mut keys: Vec<String>) -> Vec<String> {
-    let order = ["Ctrl", "Shift", "Alt", "Meta"];
+fn modifier_to_icon(modifier: &str) -> String {
+    match modifier {
+        "Ctrl" => "⌃".to_string(),
+        "Shift" => "⇧".to_string(),
+        "Alt" => "⌥".to_string(),
+        "Meta" => "⌘".to_string(),
+        _ => modifier.to_string(),
+    }
+}
+
+fn key_to_icon(key: &str) -> String {
+    match key {
+        "Enter" => "⏎".to_string(),
+        "Space" => "␣".to_string(),
+        "Tab" => "⇆".to_string(),
+        "CapsLock" => "⇪".to_string(),
+        _ => key.to_string(),
+    }
+}
+
+fn sort_modifier_icons(mut keys: Vec<String>) -> Vec<String> {
+    let order = ["⌃", "⇧", "⌥", "⌘"];
 
     keys.sort_by(|a, b| {
         let a_pos = order.iter().position(|&x| x == a).unwrap_or(100);
         let b_pos = order.iter().position(|&x| x == b).unwrap_or(100);
 
-        a_pos.cmp(&b_pos).then_with(|| a.cmp(b))
+        a_pos.cmp(&b_pos)
     });
 
     keys
