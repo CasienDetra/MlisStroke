@@ -1,12 +1,11 @@
 use rdev::{listen, Event, EventType, Key};
-use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
 pub fn run_listener<F>(emit: F)
 where
     F: Fn(String) + Send + Sync + 'static,
 {
-    let pressed_keys = Arc::new(Mutex::new(HashSet::<Key>::new()));
+    let pressed_keys = Arc::new(Mutex::new(Vec::<Key>::new()));
     let last_combo = Arc::new(Mutex::new(String::new()));
     let caps_lock_on = Arc::new(Mutex::new(false));
     let emit = Arc::new(emit);
@@ -27,7 +26,10 @@ where
                     }
 
                     let mut keys = pressed_keys.lock().unwrap();
-                    keys.insert(key);
+                    // Only add key if it's not already pressed (avoid duplicates)
+                    if !keys.contains(&key) {
+                        keys.push(key);
+                    }
 
                     let caps = caps_lock_on.lock().unwrap();
                     let combo = format_combo(&keys, *caps);
@@ -41,7 +43,7 @@ where
 
                 EventType::KeyRelease(key) => {
                     let mut keys = pressed_keys.lock().unwrap();
-                    keys.remove(&key);
+                    keys.retain(|k| k != &key);
                 }
 
                 _ => {}
@@ -54,7 +56,11 @@ where
     }
 }
 
-fn format_combo(keys: &HashSet<Key>, caps_lock_on: bool) -> String {
+// ============================================================================
+// COMBO FORMATTING
+// ============================================================================
+
+fn format_combo(keys: &Vec<Key>, caps_lock_on: bool) -> String {
     let has_shift = keys
         .iter()
         .any(|k| matches!(k, Key::ShiftLeft | Key::ShiftRight));
@@ -78,7 +84,8 @@ fn format_combo(keys: &HashSet<Key>, caps_lock_on: bool) -> String {
     }
 
     // Remove "Shift" from modifiers if it's only being used for letter capitalization
-    if has_shift && !has_caps_lock {
+    // (i.e., when there are other keys pressed AND shift is not needed for them)
+    if has_shift && !has_caps_lock && !other_keys.is_empty() {
         modifiers.retain(|p| p != "Shift");
     }
 
@@ -86,29 +93,22 @@ fn format_combo(keys: &HashSet<Key>, caps_lock_on: bool) -> String {
     let modifier_icons: Vec<String> = modifiers.iter().map(|m| modifier_to_icon(m)).collect();
     let sorted_icons = sort_modifier_icons(modifier_icons);
 
-    // Convert other keys to icons where applicable and sort
+    // Convert other keys to icons where applicable
     let other_icons: Vec<String> = other_keys.iter().map(|k| key_to_icon(k)).collect();
-    let mut sorted_others: Vec<String> = other_icons.clone();
 
-    // Sort non-modifier keys: letters alphabetically, special keys as-is
-    sorted_others.sort_by(|a, b| {
-        let a_is_letter = a.chars().all(|c| c.is_alphabetic());
-        let b_is_letter = b.chars().all(|c| c.is_alphabetic());
-
-        match (a_is_letter, b_is_letter) {
-            (true, true) => a.to_lowercase().cmp(&b.to_lowercase()),
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
-            (false, false) => a.cmp(b),
-        }
-    });
+    // Don't sort other keys - preserve the order they were pressed
+    // Just convert icons, no reordering needed
 
     // Combine: modifiers first, then other keys
     let mut result = sorted_icons;
-    result.extend(sorted_others);
+    result.extend(other_icons);
 
     result.join(" ")
 }
+
+//
+// ICON CONVERSION
+//
 
 fn modifier_to_icon(modifier: &str) -> String {
     match modifier {
@@ -143,280 +143,92 @@ fn sort_modifier_icons(mut keys: Vec<String>) -> Vec<String> {
     keys
 }
 
+//
+// KEY STRING CONVERSION
+//
+
 fn key_to_string(key: &Key, has_shift: bool, caps_lock_on: bool) -> String {
     match key {
+        // Modifier keys
         Key::ControlLeft | Key::ControlRight => "Ctrl".into(),
         Key::ShiftLeft | Key::ShiftRight => "Shift".into(),
         Key::Alt | Key::AltGr => "Alt".into(),
         Key::MetaLeft | Key::MetaRight => "Meta".into(),
         Key::CapsLock => "CapsLock".into(),
 
+        // Special navigation keys
         Key::Return => "Enter".into(),
         Key::Space => "Space".into(),
         Key::Tab => "Tab".into(),
 
-        Key::KeyA => {
-            if has_shift || caps_lock_on {
-                "A".into()
-            } else {
-                "a".into()
-            }
-        }
-        Key::KeyB => {
-            if has_shift || caps_lock_on {
-                "B".into()
-            } else {
-                "b".into()
-            }
-        }
-        Key::KeyC => {
-            if has_shift || caps_lock_on {
-                "C".into()
-            } else {
-                "c".into()
-            }
-        }
-        Key::KeyD => {
-            if has_shift || caps_lock_on {
-                "D".into()
-            } else {
-                "d".into()
-            }
-        }
-        Key::KeyE => {
-            if has_shift || caps_lock_on {
-                "E".into()
-            } else {
-                "e".into()
-            }
-        }
-        Key::KeyF => {
-            if has_shift || caps_lock_on {
-                "F".into()
-            } else {
-                "f".into()
-            }
-        }
-        Key::KeyG => {
-            if has_shift || caps_lock_on {
-                "G".into()
-            } else {
-                "g".into()
-            }
-        }
-        Key::KeyH => {
-            if has_shift || caps_lock_on {
-                "H".into()
-            } else {
-                "h".into()
-            }
-        }
-        Key::KeyI => {
-            if has_shift || caps_lock_on {
-                "I".into()
-            } else {
-                "i".into()
-            }
-        }
-        Key::KeyJ => {
-            if has_shift || caps_lock_on {
-                "J".into()
-            } else {
-                "j".into()
-            }
-        }
-        Key::KeyK => {
-            if has_shift || caps_lock_on {
-                "K".into()
-            } else {
-                "k".into()
-            }
-        }
-        Key::KeyL => {
-            if has_shift || caps_lock_on {
-                "L".into()
-            } else {
-                "l".into()
-            }
-        }
-        Key::KeyM => {
-            if has_shift || caps_lock_on {
-                "M".into()
-            } else {
-                "m".into()
-            }
-        }
-        Key::KeyN => {
-            if has_shift || caps_lock_on {
-                "N".into()
-            } else {
-                "n".into()
-            }
-        }
-        Key::KeyO => {
-            if has_shift || caps_lock_on {
-                "O".into()
-            } else {
-                "o".into()
-            }
-        }
-        Key::KeyP => {
-            if has_shift || caps_lock_on {
-                "P".into()
-            } else {
-                "p".into()
-            }
-        }
-        Key::KeyQ => {
-            if has_shift || caps_lock_on {
-                "Q".into()
-            } else {
-                "q".into()
-            }
-        }
-        Key::KeyR => {
-            if has_shift || caps_lock_on {
-                "R".into()
-            } else {
-                "r".into()
-            }
-        }
-        Key::KeyS => {
-            if has_shift || caps_lock_on {
-                "S".into()
-            } else {
-                "s".into()
-            }
-        }
-        Key::KeyT => {
-            if has_shift || caps_lock_on {
-                "T".into()
-            } else {
-                "t".into()
-            }
-        }
-        Key::KeyU => {
-            if has_shift || caps_lock_on {
-                "U".into()
-            } else {
-                "u".into()
-            }
-        }
-        Key::KeyV => {
-            if has_shift || caps_lock_on {
-                "V".into()
-            } else {
-                "v".into()
-            }
-        }
-        Key::KeyW => {
-            if has_shift || caps_lock_on {
-                "W".into()
-            } else {
-                "w".into()
-            }
-        }
-        Key::KeyX => {
-            if has_shift || caps_lock_on {
-                "X".into()
-            } else {
-                "x".into()
-            }
-        }
-        Key::KeyY => {
-            if has_shift || caps_lock_on {
-                "Y".into()
-            } else {
-                "y".into()
-            }
-        }
-        Key::KeyZ => {
-            if has_shift || caps_lock_on {
-                "Z".into()
-            } else {
-                "z".into()
-            }
-        }
+        // Letters A-Z
+        Key::KeyA => convert_letter("a", "A", has_shift, caps_lock_on),
+        Key::KeyB => convert_letter("b", "B", has_shift, caps_lock_on),
+        Key::KeyC => convert_letter("c", "C", has_shift, caps_lock_on),
+        Key::KeyD => convert_letter("d", "D", has_shift, caps_lock_on),
+        Key::KeyE => convert_letter("e", "E", has_shift, caps_lock_on),
+        Key::KeyF => convert_letter("f", "F", has_shift, caps_lock_on),
+        Key::KeyG => convert_letter("g", "G", has_shift, caps_lock_on),
+        Key::KeyH => convert_letter("h", "H", has_shift, caps_lock_on),
+        Key::KeyI => convert_letter("i", "I", has_shift, caps_lock_on),
+        Key::KeyJ => convert_letter("j", "J", has_shift, caps_lock_on),
+        Key::KeyK => convert_letter("k", "K", has_shift, caps_lock_on),
+        Key::KeyL => convert_letter("l", "L", has_shift, caps_lock_on),
+        Key::KeyM => convert_letter("m", "M", has_shift, caps_lock_on),
+        Key::KeyN => convert_letter("n", "N", has_shift, caps_lock_on),
+        Key::KeyO => convert_letter("o", "O", has_shift, caps_lock_on),
+        Key::KeyP => convert_letter("p", "P", has_shift, caps_lock_on),
+        Key::KeyQ => convert_letter("q", "Q", has_shift, caps_lock_on),
+        Key::KeyR => convert_letter("r", "R", has_shift, caps_lock_on),
+        Key::KeyS => convert_letter("s", "S", has_shift, caps_lock_on),
+        Key::KeyT => convert_letter("t", "T", has_shift, caps_lock_on),
+        Key::KeyU => convert_letter("u", "U", has_shift, caps_lock_on),
+        Key::KeyV => convert_letter("v", "V", has_shift, caps_lock_on),
+        Key::KeyW => convert_letter("w", "W", has_shift, caps_lock_on),
+        Key::KeyX => convert_letter("x", "X", has_shift, caps_lock_on),
+        Key::KeyY => convert_letter("y", "Y", has_shift, caps_lock_on),
+        Key::KeyZ => convert_letter("z", "Z", has_shift, caps_lock_on),
 
-        // Special characters
-        Key::LeftBracket => {
-            if has_shift {
-                "{".into()
-            } else {
-                "[".into()
-            }
-        }
-        Key::RightBracket => {
-            if has_shift {
-                "}".into()
-            } else {
-                "]".into()
-            }
-        }
-        Key::SemiColon => {
-            if has_shift {
-                ":".into()
-            } else {
-                ";".into()
-            }
-        }
-        Key::Quote => {
-            if has_shift {
-                "\"".into()
-            } else {
-                "'".into()
-            }
-        }
-        Key::Comma => {
-            if has_shift {
-                "<".into()
-            } else {
-                ",".into()
-            }
-        }
-        Key::Dot => {
-            if has_shift {
-                ">".into()
-            } else {
-                ".".into()
-            }
-        }
-        Key::Slash => {
-            if has_shift {
-                "?".into()
-            } else {
-                "/".into()
-            }
-        }
-        Key::BackSlash => {
-            if has_shift {
-                "|".into()
-            } else {
-                "\\".into()
-            }
-        }
-        Key::BackQuote => {
-            if has_shift {
-                "~".into()
-            } else {
-                "`".into()
-            }
-        }
-        Key::Minus => {
-            if has_shift {
-                "_".into()
-            } else {
-                "-".into()
-            }
-        }
-        Key::Equal => {
-            if has_shift {
-                "+".into()
-            } else {
-                "=".into()
-            }
-        }
+        // Bracket characters
+        Key::LeftBracket => convert_char("[", "{", has_shift),
+        Key::RightBracket => convert_char("]", "}", has_shift),
 
+        // Punctuation characters
+        Key::SemiColon => convert_char(";", ":", has_shift),
+        Key::Quote => convert_char("'", "\"", has_shift),
+        Key::Comma => convert_char(",", "<", has_shift),
+        Key::Dot => convert_char(".", ">", has_shift),
+        Key::Slash => convert_char("/", "?", has_shift),
+        Key::BackSlash => convert_char("\\", "|", has_shift),
+        Key::BackQuote => convert_char("`", "~", has_shift),
+
+        // Operator characters
+        Key::Minus => convert_char("-", "_", has_shift),
+        Key::Equal => convert_char("=", "+", has_shift),
+
+        // Default case for unknown keys
         _ => format!("{:?}", key),
+    }
+}
+
+//
+// HELPER FUNCTIONS
+//
+
+/// Convert a letter character based on shift and caps lock state
+fn convert_letter(lowercase: &str, uppercase: &str, has_shift: bool, caps_lock_on: bool) -> String {
+    if has_shift || caps_lock_on {
+        uppercase.into()
+    } else {
+        lowercase.into()
+    }
+}
+
+/// Convert a character based on shift state only
+fn convert_char(normal: &str, shifted: &str, has_shift: bool) -> String {
+    if has_shift {
+        shifted.into()
+    } else {
+        normal.into()
     }
 }
