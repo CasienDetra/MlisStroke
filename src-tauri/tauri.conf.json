@@ -15,15 +15,15 @@
         "label": "main",
         "transparent": true,
         "decorations": false,
+        "hiddenTitle": true,
         "alwaysOnTop": true,
         "fullscreen": false,
         "resizable": true,
+        "titleBarStyle": "Overlay",
         "skipTaskbar": true,
         "shadow": false,
-        "height": 150,
-        "width": 300,
-        "minHeight": 60,
-        "minWidth": 100
+        "focus": false,
+        "focusable": false
       }
     ],
     "security": {
