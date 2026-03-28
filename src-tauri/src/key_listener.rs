@@ -69,6 +69,7 @@ fn format_combo(keys: &Vec<Key>, caps_lock_on: bool) -> String {
     let parts: Vec<String> = keys
         .iter()
         .map(|k| key_to_string(k, has_shift, caps_lock_on))
+        .filter(|s| !s.is_empty()) // Filter out empty strings from ignored keys
         .collect();
 
     // Separate modifiers from other keys (letters, special keys, etc.)
@@ -206,8 +207,15 @@ fn key_to_string(key: &Key, has_shift: bool, caps_lock_on: bool) -> String {
         Key::Minus => convert_char("-", "_", has_shift),
         Key::Equal => convert_char("=", "+", has_shift),
 
-        // Default case for unknown keys
-        _ => format!("{:?}", key),
+        // Default case for unknown keys - return empty string if it contains parentheses
+        _ => {
+            let key_str = format!("{:?}", key);
+            if key_str.contains('(') || key_str.contains(')') {
+                String::new()
+            } else {
+                key_str
+            }
+        }
     }
 }
 
