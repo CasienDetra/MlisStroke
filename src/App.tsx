@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { Key } from "./components/Key";
 import "./styles.css";
 
 export default function App() {
   const [combo, setCombo] = useState<string>("");
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const unlistenPromise = listen<string>("key_combo", (event) => {
       const value = event.payload;
 
       setCombo(value);
-      setVisible(true);
-
-      // auto hide after 1.2s
-      // setTimeout(() => {
-      //   setVisible(false);
-      // }, 1200);
     });
 
     return () => {
@@ -31,9 +25,7 @@ export default function App() {
 <div className="drag container">
   <div className="keystroke">
     {keys.map((k, i) => (
-      <div key={i} className="key">
-        {k}
-      </div>
+      <Key key={i} value={k} />
     ))}
   </div>
 </div>

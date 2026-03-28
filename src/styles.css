@@ -10,21 +10,37 @@ body {
   background: transparent;
   overflow: hidden;
   font-family: "Inter";
+  width: auto;
+  height: auto;
 }
+
+#root {
+  width: auto;
+  height: auto;
+}
+
 .container {
   position: fixed;
   bottom: 60px;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
 }
 
 .keystroke {
+  border: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   gap: 10px;
   border-radius: 10px;
   background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   animation: fadeInOut 1.2s ease;
+  width: fit-content;
+  height: fit-content;
 }
 
 .key {
@@ -32,6 +48,12 @@ body {
   color: white;
   font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Regular keys (letters, numbers, etc.) */
+.key-regular {
+  padding: 10px 12px;
 }
 
 .drag {
